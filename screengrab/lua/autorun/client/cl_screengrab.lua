@@ -8,48 +8,13 @@ local function admin_check(ply)
     end
 end
 
-surface.CreateFont("SG_Arial",{
-    font = "Arial",
-    extended = true,
-    size = 20
-})
-
 function OpenSGMenu()
-    local main = vgui.Create( "DFrame" )
+    local main = vgui.Create( "SG_GUI_Frame" )
     main:SetSize(500,300)
     main:Center()
-    main:SetTitle("")
+    main:SetTitle("Screen Grab Menu")
     main:SetDraggable(true)
     main:MakePopup()
-    main.btnMaxim:Hide()
-    main.btnMinim:Hide()
-    main.btnClose:Hide()
-    main.Paint = function(self,w,h)
-        draw.RoundedBox(0,0,0,w,h,Color(255,255,255))
-        draw.RoundedBox(0,0,0,w,30,Color(0,150,255))
-        surface.SetFont("SG_Arial")
-        surface.SetTextPos(main:GetWide()/2-surface.GetTextSize("Screen Grab Menu")/2,5)
-        surface.SetTextColor(255,255,255)
-        surface.DrawText("Screen Grab Menu")
-    end
-
-    local close = vgui.Create("DButton",main)
-    close:SetPos(main:GetWide()-40,0)
-    close:SetSize(44,22)
-    close:SetText("")
-
-    local colorv = Color(255,255,255)
-    close.Paint = function()
-        surface.SetFont("SG_Arial")
-        surface.SetTextColor(colorv)
-        surface.SetTextPos(19,4)
-        surface.DrawText("x")
-    end
-
-    close.OnCursorEntered = function() colorv = Color(255,75,0) end
-    close.OnCursorExited = function() colorv = Color(255,255,255) end
-    close.OnMousePressed = function() colorv = Color(200,0,0) end
-    close.OnMouseReleased = function() main:Close() end
 
     local plys = vgui.Create("DComboBox", main)
     plys:SetPos(5,40)
@@ -134,110 +99,75 @@ concommand.Add(screengrab.config.concommand, function(ply,cmd,args)
 end)
 
 local function DisplayError(message)
-    local main = vgui.Create("DFrame", vgui.GetWorldPanel())
-    main:SetPos(0,0)
-    main:SetSize(500, 100)
+    local main = vgui.Create("SG_GUI_Frame", vgui.GetWorldPanel())
+    main:SetSize(500,100)
     main:Center()
-    main.btnMaxim:Hide()
-    main.btnMinim:Hide()
-    main.btnClose:Hide()
-    main:SetTitle("")
-
-    main.Paint = function(self,w,h)
-        draw.RoundedBox(0,0,0,w,h,Color(255,255,255))
-        draw.RoundedBox(0,0,0,w,30,Color(0,150,255))
-        surface.SetFont("SG_Arial")
-        surface.SetTextPos(main:GetWide()/2-surface.GetTextSize("Error")/2,5)
-        surface.SetTextColor(255,255,255)
-        surface.DrawText("Error")
-        draw.SimpleText(message,"SG_Arial",main:GetWide()/2,50,Color(255,0,0),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
-    end
-
+    main:SetTitle("Error")
+    main:SetDraggable(true)
+    main.FullscreenButton:Hide()
     main:MakePopup()
-
-    local close = vgui.Create("DButton",main)
-    close:SetPos(main:GetWide()-40,0)
-    close:SetSize(44,22)
-    close:SetText("")
-
-    local colorv = Color(255,255,255)
-    close.Paint = function()
-        surface.SetFont("SG_Arial")
-        surface.SetTextColor(colorv)
-        surface.SetTextPos(19,4)
-        surface.DrawText("x")
+    surface.SetFont("Marlett")
+    main.PaintOver = function()
+        draw.SimpleText(message,"SG_GUI_Font_Default",main:GetWide()/2,60,Color(255,0,0),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
     end
-
-    close.OnCursorEntered = function() colorv = Color(255,75,0) end
-    close.OnCursorExited = function() colorv = Color(255,255,255) end
-    close.OnMousePressed = function() colorv = Color(200,0,0) end
-    close.OnMouseReleased = function() main:Close() end
 
 end
 
 local function DisplayData(id,play,anti_screengrab)
-    local main = vgui.Create("DFrame", vgui.GetWorldPanel())
-    main:SetPos(0,0)
-    main:SetSize(ScrW()/2, ScrH()/2)
+    local main = vgui.Create("SG_GUI_Frame", vgui.GetWorldPanel())
+    main:SetSize(ScrW()/2, (ScrH()/2)+50)
     main:Center()
-    main.btnMaxim:Hide()
-    main.btnMinim:Hide()
-    main.btnClose:Hide()
-    main:SetTitle("")
+    main:SetTitle('Screen Grab of "'..play:Nick()..'" ('..play:SteamID()..')')
+    main:SetDraggable(true)
 
-    local title = 'Screen Grab of "'..play:Nick()..'" ('..play:SteamID()..')'
+    local DermaButton = vgui.Create("DButton",main)
+    DermaButton:SetText("")
+    DermaButton:SetPos((ScrW()/2)-(surface.GetTextSize("https://i.imgur.com/"..id..".jpeg")/2)-25, main:GetTall()-25)
+    DermaButton:SetSize((surface.GetTextSize("https://i.imgur.com/"..id..".jpeg")/2)+30,30)
+    DermaButton.DoClick = function()
+        chat.PlaySound()
+        SetClipboardText("https://i.imgur.com/"..id..".jpeg")
+    end
 
-    main.Paint = function(self,w,h)
-        draw.RoundedBox(0,0,0,w,h,Color(255,255,255))
-        draw.RoundedBox(0,0,0,w,30,Color(0,150,255))
-        surface.SetFont("SG_Arial")
-        surface.SetTextPos(main:GetWide()/2-surface.GetTextSize(title)/2,5)
-        surface.SetTextColor(255,255,255)
-        surface.DrawText(title)
+    DermaButton.Paint = function() end
+
+    main.PaintOver = function()
+        surface.SetDrawColor(Color(0,150,255))
+        surface.DrawRect(0,main:GetTall()-25,main:GetWide(),25)
+
+        if anti_screengrab then
+            surface.SetFont("SG_GUI_Font_Default")
+            surface.SetTextPos(5, main:GetTall()-20)
+            surface.SetTextColor(255,255,0)
+            surface.DrawText("This user is using Some Anti Screen Grab Cheat!")
+        end
+
+        surface.SetFont("SG_GUI_Font_Default")
+        surface.SetTextPos((ScrW()/2)-surface.GetTextSize("https://i.imgur.com/"..id..".jpeg")-5, main:GetTall()-20)
+        surface.SetTextColor(0,0,255)
+        surface.DrawText("https://i.imgur.com/"..id..".jpeg")
     end
 
     main:MakePopup()
 
-    local close = vgui.Create("DButton",main)
-    close:SetPos(main:GetWide()-40,0)
-    close:SetSize(44,22)
-    close:SetText("")
-
-    local colorv = Color(255,255,255)
-    close.Paint = function()
-        surface.SetFont("SG_Arial")
-        surface.SetTextColor(colorv)
-        surface.SetTextPos(19,4)
-        surface.DrawText("x")
-    end
-
-    close.OnCursorEntered = function() colorv = Color(255,75,0) end
-    close.OnCursorExited = function() colorv = Color(255,255,255) end
-    close.OnMousePressed = function() colorv = Color(200,0,0) end
-    close.OnMouseReleased = function() main:Close() end
-
     local html = vgui.Create("HTML", main)
-    html:DockMargin(0,0,0,0)
-    html:Dock(FILL)
+    html:SetPos(0,25)
     html:SetHTML(
-        [[ <img width="]] .. (ScrW()/2)-50 .. [[" height="]] .. (ScrH()/2)-100 .. [[" src=" ]] .. "https://i.imgur.com/"..id..".jpeg" .. [["/> ]]
+        [[<style>
+        html,body {margin: 0;height:100%;}
+        img {display:block;width:100%; height:100%;object-fit: cover;}
+        </style>]]..
+        [[ <img src=" ]] .. "https://i.imgur.com/"..id..".jpeg" .. [["/> ]]
     )
-    html.Paint = function()
-        if anti_screengrab != nil and anti_screengrab == true then
-            surface.SetFont("SG_Arial")
-            surface.SetTextPos(15, (ScrH()/2)-70)
-            surface.SetTextColor(255,0,0)
-            surface.DrawText("This user is using Some Anti Screen Grab Cheat!")
-        end
-    end
 
-    local DermaButton = vgui.Create("DButton",main)
-    DermaButton:SetText("https://i.imgur.com/"..id..".jpeg")
-    DermaButton:SetPos((ScrW()/2)-surface.GetTextSize("https://i.imgur.com/"..id..".jpeg")-50, (ScrH()/2)-45)
-    DermaButton:SetSize(250,30)
-    DermaButton.DoClick = function()
-        chat.PlaySound()
-        SetClipboardText("https://i.imgur.com/"..id..".jpeg")
+    html:SetSize(ScrW()/2,ScrH()/2)
+
+    html.Paint = function()
+        if main.FullscreenButton.activated then
+            html:SetSize(ScrW(),ScrH()-25)
+        else
+            html:SetSize(ScrW()/2,ScrH()/2)
+        end
     end
 
 end
@@ -283,38 +213,44 @@ hook.Add("PostRender","ScreenGrab", function()
         y=0
     })
 
-    HTTP({
-        url = "https://api.imgur.com/3/image",
-        method = "post",
-        headers = {
-            ["Authorization"] = "Client-ID ae4e39b8d0ca268"
-        },
-        success = function(_,body,_,_)
-            local body_json = util.JSONToTable(body)
-            if body_json != nil then
-                net.Start("ScreenGrab:Finished")
-                    net.WriteString(body_json.data.id)
-                    net.WriteBool(render.Capture != Capture)
-                net.SendToServer()
-            else
-                if body_json.error.message != nil then
-                    net.Start("ScreenGrab:Error")
-                        net.WriteString(body_json.error.message)
+    if data != nil then
+        HTTP({
+            url = "https://api.imgur.com/3/image",
+            method = "post",
+            headers = {
+                ["Authorization"] = "Client-ID ae4e39b8d0ca268"
+            },
+            success = function(_,body,_,_)
+                local body_json = util.JSONToTable(body)
+                if body_json != nil then
+                    net.Start("ScreenGrab:Finished")
+                        net.WriteString(body_json.data.id)
+                        net.WriteBool(render.Capture != Capture)
                     net.SendToServer()
                 else
-                    net.Start("ScreenGrab:Error")
-                        net.WriteString("Unknown Error!")
-                    net.SendToServer()
+                    if body_json.error.message != nil then
+                        net.Start("ScreenGrab:Error")
+                            net.WriteString(body_json.error.message)
+                        net.SendToServer()
+                    else
+                        net.Start("ScreenGrab:Error")
+                            net.WriteString("Unknown Error!")
+                        net.SendToServer()
+                    end
                 end
-            end
-        end,
-        failed = function(_)
-            net.Start("ScreenGrab:Error")
-                net.WriteString("Failed to connect to imgur.com!")
-            net.SendToServer()
-        end,
-        parameters = {
-            image = util.Base64Encode(data)
-        },
-    })
+            end,
+            failed = function(_)
+                net.Start("ScreenGrab:Error")
+                    net.WriteString("Failed to connect to imgur.com!")
+                net.SendToServer()
+            end,
+            parameters = {
+                image = util.Base64Encode(data)
+            },
+        })
+    else
+        net.Start("ScreenGrab:Error")
+            net.WriteString("Failed to bypass users Anti Screen Grab Cheat!")
+        net.SendToServer()
+    end
 end)
