@@ -11,10 +11,7 @@ end
 function OpenSGMenu()
     local main = vgui.Create( "SG_GUI_Frame" )
     main:SetSize(500,300)
-    main:Center()
     main:SetTitle("Screen Grab Menu")
-    main:SetDraggable(true)
-    main:MakePopup()
 
     local plys = vgui.Create("DComboBox", main)
     plys:SetPos(5,40)
@@ -60,6 +57,8 @@ function OpenSGMenu()
         net.SendToServer()
     end
 
+    main:Animate()
+
 end
 
 concommand.Add(screengrab.config.concommand, function(ply,cmd,args)
@@ -101,24 +100,18 @@ end)
 local function DisplayError(message)
     local main = vgui.Create("SG_GUI_Frame", vgui.GetWorldPanel())
     main:SetSize(500,100)
-    main:Center()
     main:SetTitle("Error")
-    main:SetDraggable(true)
     main.FullscreenButton:Hide()
-    main:MakePopup()
-    surface.SetFont("Marlett")
     main.PaintOver = function()
         draw.SimpleText(message,"SG_GUI_Font_Default",main:GetWide()/2,60,Color(255,0,0),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
     end
-
+    main:Animate()
 end
 
 local function DisplayData(id,play,anti_screengrab)
     local main = vgui.Create("SG_GUI_Frame", vgui.GetWorldPanel())
     main:SetSize(ScrW()/2, (ScrH()/2)+50)
-    main:Center()
     main:SetTitle('Screen Grab of "'..play:Nick()..'" ('..play:SteamID()..')')
-    main:SetDraggable(true)
 
     local DermaButton = vgui.Create("DButton",main)
     DermaButton:SetText("")
@@ -148,8 +141,6 @@ local function DisplayData(id,play,anti_screengrab)
         surface.DrawText("https://i.imgur.com/"..id..".jpeg")
     end
 
-    main:MakePopup()
-
     local html = vgui.Create("HTML", main)
     html:SetPos(0,25)
     html:SetHTML(
@@ -169,6 +160,8 @@ local function DisplayData(id,play,anti_screengrab)
             html:SetSize(ScrW()/2,ScrH()/2)
         end
     end
+
+    main:Animate()
 
 end
 

@@ -53,11 +53,11 @@ function PANEL:Init()
                 self:SetSize(self.FullscreenButton.oldx, self.FullscreenButton.oldy)
                 self:CenterHorizontal()
                 self.FullscreenButton.text = "1"
+                self.FullscreenButton.activated = false
                 self:MoveTo(self:GetPos(),(ScrH()/2)-(self:GetTall()/2),0.5,0,-1,function()
                     self:SetMouseInputEnabled(true)
                     self:SetKeyboardInputEnabled(true)
                     self:SetDraggable(true)
-                    self.FullscreenButton.activated = false
                 end)
             end)
         else
@@ -73,10 +73,10 @@ function PANEL:Init()
                 self:SetSize(ScrW(), ScrW())
                 self:CenterHorizontal()
                 self.FullscreenButton.text = "2"
+                self.FullscreenButton.activated = true
                 self:MoveTo(0,0,0.5,0,-1,function()
                     self:SetMouseInputEnabled(true)
                     self:SetKeyboardInputEnabled(true)
-                    self.FullscreenButton.activated = true
                 end)
             end)
 
@@ -104,15 +104,32 @@ end
 function PANEL:Close()
 	self:SetMouseInputEnabled(false)
 	self:SetKeyboardInputEnabled(false)
-	local x = self:GetPos()
 	self:Stop()
-	self:MoveTo(x,ScrH(),0.5,0,-1,function()
+	self:MoveTo(self:GetPos(),ScrH(),0.5,0,-1,function()
 		self:Remove()
 	end)
 
 	if (self.OnClose ~= nil) then
 		self.OnClose()
 	end
+end
+
+function PANEL:Animate()
+    self:Center()
+    self.oldposy = select(2,self:GetPos())
+    self:SetPos(select(1,self:GetPos()),ScrH())
+    self:MakePopup()
+    self:SetMouseInputEnabled(false)
+    self:SetKeyboardInputEnabled(false)
+    self:SetDraggable(false)
+
+    self:MoveTo(select(1,self:GetPos()),self.oldposy,0.5,0,-1,function()
+        self:SetMouseInputEnabled(true)
+        self:SetKeyboardInputEnabled(true)
+        self:SetDraggable(true)
+        self.oldposy = nil
+	end)
+
 end
 
 derma.DefineControl("SG_GUI_Frame",nil,PANEL,"DFrame")
